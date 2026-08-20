@@ -1,0 +1,18 @@
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Segoe UI', Arial, sans-serif; background-color: #f4f6f9; color: #333; line-height: 1.6; }
+.main-header { background-color: #0284c7; color: white; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; }
+.nav-menu a { color: white; text-decoration: none; margin-left: 20px; font-weight: 500; }
+.nav-menu a:hover { text-decoration: underline; }
+.container { max-width: 1200px; margin: 30px auto; background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+h1 { margin-bottom: 20px; color: #0284c7; }
+.data-table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+.data-table th, .data-table td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
+.data-table th { background-color: #0284c7; color: white; }
+.row-alert { background-color: #fef2f2; }
+.badge { padding: 4px 8px; border-radius: 4px; color: white; font-weight: bold; }
+.bg-danger { background-color: #ef4444; }
+.bg-success { background-color: #22c55e; }
+.text-danger { color: #dc2626; font-weight: bold; }
+.text-warning { color: #d97706; font-weight: bold; }
+.text-success { color: #16a34a; font-weight: bold; }
+.main-footer { text-align: center; margin-top: 40px; padding: 20px; color: #666; font-size: 0.9rem; }
