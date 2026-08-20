@@ -1,7 +1,14 @@
 <?php
-// Enrutador Front Controller
+session_start();
+
 $controlador = $_GET['controlador'] ?? 'Producto';
 $accion = $_GET['accion'] ?? 'index';
+
+// Verificar si el usuario ha iniciado sesión
+if (!isset($_SESSION['id_usuario']) && $controlador !== 'Auth') {
+    header('Location: index.php?controlador=Auth&accion=login');
+    exit;
+}
 
 $nombreControlador = $controlador . 'Controller';
 $archivoControlador = '../controllers/' . $nombreControlador . '.php';

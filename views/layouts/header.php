@@ -14,6 +14,13 @@
         <nav class="nav-menu">
             <a href="index.php?controlador=Producto&accion=index">Medicamentos</a>
             <a href="index.php?controlador=Venta&accion=pos">Punto de Venta (POS)</a>
+            
+            <?php if (isset($_SESSION['nombre'])): ?>
+                <span style="margin-left: 20px; font-weight: bold; color: #e0f2fe;">
+                    👤 <?= htmlspecialchars($_SESSION['nombre']) ?> (<?= $_SESSION['rol'] ?>)
+                </span>
+                <a href="index.php?controlador=Auth&accion=logout" style="color: #fca5a5; margin-left: 15px;">Cerrar Sesión</a>
+            <?php endif; ?>
         </nav>
     </header>
     <main class="container">
