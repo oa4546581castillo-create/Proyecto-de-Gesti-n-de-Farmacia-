@@ -13,9 +13,9 @@ class AuthController {
     }
 
     public function login() {
-        // Si ya hay sesión iniciada, redirigir al inventario
+        // Si ya hay sesión iniciada, redirigir al Dashboard
         if (isset($_SESSION['id_usuario'])) {
-            header('Location: index.php?controlador=Producto&accion=index');
+            header('Location: index.php?controlador=Dashboard&accion=index');
             exit;
         }
 
@@ -36,7 +36,8 @@ class AuthController {
                     $_SESSION['usuario'] = $datosUsuario['usuario'];
                     $_SESSION['rol'] = $datosUsuario['rol'];
 
-                    header('Location: index.php?controlador=Producto&accion=index');
+                    // Redirigir al Dashboard tras login exitoso
+                    header('Location: index.php?controlador=Dashboard&accion=index');
                     exit;
                 } else {
                     $error = "Usuario o contraseña incorrectos.";

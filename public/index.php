@@ -1,7 +1,8 @@
 <?php
 session_start();
 
-$controlador = $_GET['controlador'] ?? 'Producto';
+// CAMBIA 'Producto' POR 'Dashboard' AQUÍ:
+$controlador = $_GET['controlador'] ?? 'Dashboard';
 $accion = $_GET['accion'] ?? 'index';
 
 // Verificar si el usuario ha iniciado sesión
