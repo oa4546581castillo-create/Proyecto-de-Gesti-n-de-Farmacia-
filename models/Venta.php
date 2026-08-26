@@ -6,7 +6,7 @@ class Venta {
         $this->conn = $db;
     }
 
-    // Buscar productos activos con stock disponible por nombre o código de barras
+    // Buscar productos activos con stock disponible por nombre o código de barras (POS)
     public function buscarProductos($criterio) {
         $query = "SELECT id_producto, nombre, precio_venta, stock_actual 
                   FROM productos 
@@ -20,7 +20,7 @@ class Venta {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    // Registrar la venta en la base de datos dentro de una transacción
+    // Registrar la venta en la base de datos dentro de una transacción (POS)
     public function registrarVenta($id_usuario, $id_cliente, $total, $detalles) {
         try {
             $this->conn->beginTransaction();
@@ -46,7 +46,6 @@ class Venta {
 
             // 3. Iterar cada producto vendido
             foreach ($detalles as $item) {
-                // Insertar detalle
                 $stmtDetalle->bindParam(':id_venta', $id_venta);
                 $stmtDetalle->bindParam(':id_producto', $item['id_producto']);
                 $stmtDetalle->bindParam(':cantidad', $item['cantidad']);
@@ -54,7 +53,6 @@ class Venta {
                 $stmtDetalle->bindParam(':subtotal', $item['subtotal']);
                 $stmtDetalle->execute();
 
-                // Descontar stock
                 $stmtStock->bindParam(':cantidad', $item['cantidad']);
                 $stmtStock->bindParam(':id_producto', $item['id_producto']);
                 $stmtStock->execute();
@@ -67,5 +65,43 @@ class Venta {
             $this->conn->rollBack();
             return ['status' => false, 'mensaje' => $e->getMessage()];
         }
+    }
+
+    // Obtener el historial de ventas con filtros de fecha opcionales (HISTORIAL)
+    public function obtenerHistorial($fechaInicio = null, $fechaFin = null) {
+        $sql = "SELECT v.id_venta, v.total, v.fecha_venta, 
+                       u.nombre AS cajero, 
+                       COALESCE(c.nombre, 'Cliente General') AS cliente
+                FROM ventas v
+                INNER JOIN usuarios u ON v.id_usuario = u.id_usuario
+                LEFT JOIN clientes c ON v.id_cliente = c.id_cliente";
+
+        if ($fechaInicio && $fechaFin) {
+            $sql .= " WHERE DATE(v.fecha_venta) BETWEEN :fecha_inicio AND :fecha_fin";
+        }
+
+        $sql .= " ORDER BY v.fecha_venta DESC";
+
+        $stmt = $this->conn->prepare($sql);
+
+        if ($fechaInicio && $fechaFin) {
+            $stmt->bindParam(':fecha_inicio', $fechaInicio);
+            $stmt->bindParam(':fecha_fin', $fechaFin);
+        }
+
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    // Obtener los productos comprados en una venta específica (HISTORIAL)
+    public function obtenerDetalleVenta($id_venta) {
+        $sql = "SELECT dv.cantidad, dv.precio_unitario, dv.subtotal, p.nombre AS producto
+                FROM detalle_ventas dv
+                INNER JOIN productos p ON dv.id_producto = p.id_producto
+                WHERE dv.id_venta = :id_venta";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindParam(':id_venta', $id_venta);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 }

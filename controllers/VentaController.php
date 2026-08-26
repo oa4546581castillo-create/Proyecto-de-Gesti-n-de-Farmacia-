@@ -55,4 +55,29 @@ class VentaController {
             exit;
         }
     }
+
+    // Muestra la pantalla del historial con filtros de fecha
+    public function historial() {
+        $fechaInicio = $_GET['fecha_inicio'] ?? date('Y-m-01');
+        $fechaFin = $_GET['fecha_fin'] ?? date('Y-m-d');
+
+        $ventas = $this->ventaModel->obtenerHistorial($fechaInicio, $fechaFin);
+
+        $totalIngresos = array_sum(array_column($ventas, 'total'));
+
+        require_once __DIR__ . '/../views/layouts/header.php';
+        require_once __DIR__ . '/../views/ventas/historial.php';
+        require_once __DIR__ . '/../views/layouts/footer.php';
+    }
+
+    // Endpoint AJAX para cargar los medicamentos de una venta en el modal
+    public function obtenerDetalle() {
+        $id_venta = $_GET['id'] ?? null;
+        if ($id_venta) {
+            $detalles = $this->ventaModel->obtenerDetalleVenta($id_venta);
+            header('Content-Type: application/json');
+            echo json_encode($detalles);
+            exit;
+        }
+    }
 }

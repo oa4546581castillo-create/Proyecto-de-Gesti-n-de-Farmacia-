@@ -1,58 +1,108 @@
-<h1>Gestión de Medicamentos e Inventario</h1>
+<div class="module-header">
+    <h2>📦 Catálogo de Medicamentos</h2>
+    <a href="index.php?controlador=Producto&accion=crear" class="btn-primary">+ Nuevo Medicamento</a>
+</div>
 
-<table class="data-table">
-    <thead>
-        <tr>
-            <th>ID</th>
-            <th>Cód. Barras</th>
-            <th>Nombre</th>
-            <th>Precio Compra</th>
-            <th>Precio Venta</th>
-            <th>Stock Actual</th>
-            <th>Stock Mínimo</th>
-            <th>Vencimiento</th>
-            <th>Estado</th>
-        </tr>
-    </thead>
-    <tbody>
-        <?php if (!empty($productos)): ?>
-            <?php foreach ($productos as $p): 
-                $hoy = date('Y-m-d');
-                $proximoVencer = date('Y-m-d', strtotime('+30 days'));
-                $alertaStock = ($p['stock_actual'] <= $p['stock_minimo']);
-                $alertaVencido = ($p['fecha_vencimiento'] <= $hoy);
-                $alertaProximo = ($p['fecha_vencimiento'] <= $proximoVencer && !$alertaVencido);
-            ?>
-            <tr class="<?= $alertaStock || $alertaVencido ? 'row-alert' : '' ?>">
-                <td><?= $p['id_producto'] ?></td>
-                <td><?= htmlspecialchars($p['codigo_barras'] ?? 'N/A') ?></td>
-                <td><strong><?= htmlspecialchars($p['nombre']) ?></strong></td>
-                <td>$<?= number_format($p['precio_compra'], 2) ?></td>
-                <td>$<?= number_format($p['precio_venta'], 2) ?></td>
-                <td>
-                    <span class="badge <?= $alertaStock ? 'bg-danger' : 'bg-success' ?>">
-                        <?= $p['stock_actual'] ?>
-                    </span>
-                </td>
-                <td><?= $p['stock_minimo'] ?></td>
-                <td><?= $p['fecha_vencimiento'] ?></td>
-                <td>
-                    <?php if ($alertaVencido): ?>
-                        <span class="text-danger">¡VENCIDO!</span>
-                    <?php elseif ($alertaProximo): ?>
-                        <span class="text-warning">Próximo a vencer</span>
-                    <?php elseif ($alertaStock): ?>
-                        <span class="text-danger">Stock Bajo</span>
-                    <?php else: ?>
-                        <span class="text-success">Disponible</span>
-                    <?php endif; ?>
-                </td>
-            </tr>
-            <?php endforeach; ?>
-        <?php else: ?>
+<div class="table-card">
+    <table class="data-table">
+        <thead>
             <tr>
-                <td colspan="9" style="text-align:center;">No hay medicamentos registrados en el sistema.</td>
+                <th>Código</th>
+                <th>Nombre</th>
+                <th>P. Compra</th>
+                <th>P. Venta</th>
+                <th>Stock</th>
+                <th>Vencimiento</th>
+                <th>Acciones</th>
             </tr>
-        <?php endif; ?>
-    </tbody>
-</table>
+        </thead>
+        <tbody>
+            <?php if (empty($productos)): ?>
+                <tr>
+                    <td colspan="7" style="text-align: center; color: #94a3b8;">No hay medicamentos registrados.</td>
+                </tr>
+            <?php else: ?>
+                <?php foreach ($productos as $p): ?>
+                    <tr>
+                        <td><code><?= htmlspecialchars($p['codigo_barras'] ?: 'N/A') ?></code></td>
+                        <td>
+                            <strong><?= htmlspecialchars($p['nombre']) ?></strong>
+                            <?php if (!empty($p['descripcion'])): ?>
+                                <br><small style="color: #64748b;"><?= htmlspecialchars($p['descripcion']) ?></small>
+                            <?php endif; ?>
+                        </td>
+                        <td>$<?= number_format($p['precio_compra'], 2) ?></td>
+                        <td><strong>$<?= number_format($p['precio_venta'], 2) ?></strong></td>
+                        <td>
+                            <?php if ($p['stock_actual'] <= $p['stock_minimo']): ?>
+                                <span class="badge badge-danger"><?= $p['stock_actual'] ?> (Bajo)</span>
+                            <?php else: ?>
+                                <span class="badge badge-success"><?= $p['stock_actual'] ?></span>
+                            <?php endif; ?>
+                        </td>
+                        <td><?= $p['fecha_vencimiento'] ? date('d/m/Y', strtotime($p['fecha_vencimiento'])) : 'Sin fecha' ?></td>
+                        <td class="action-buttons">
+                            <a href="index.php?controlador=Producto&accion=editar&id=<?= $p['id_producto'] ?>" class="btn-sm btn-edit">✏️ Editar</a>
+                            <a href="index.php?controlador=Producto&accion=eliminar&id=<?= $p['id_producto'] ?>" class="btn-sm btn-delete" onclick="return confirm('¿Eliminar este producto?')">🗑️</a>
+                        </td>
+                    </tr>
+                <?php endforeach; ?>
+            <?php endif; ?>
+        </tbody>
+    </table>
+</div>
+
+<style>
+.module-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+.btn-primary {
+    background: #0284c7;
+    color: white;
+    padding: 10px 18px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 600;
+}
+.table-card {
+    background: white;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    overflow: hidden;
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+}
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+.data-table th, .data-table td {
+    padding: 14px;
+    text-align: left;
+    border-bottom: 1px solid #e2e8f0;
+}
+.data-table th {
+    background: #f8fafc;
+    color: #475569;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+}
+.badge {
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+.badge-success { background: #dcfce7; color: #166534; }
+.badge-danger { background: #fee2e2; color: #991b1b; }
+.btn-sm {
+    padding: 6px 10px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-size: 0.85rem;
+}
+.btn-edit { background: #f0f9ff; color: #0284c7; }
+.btn-delete { background: #fef2f2; color: #ef4444; }
+</style>
