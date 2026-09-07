@@ -1,233 +1,205 @@
+<?php
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+$rolUsuario = $_SESSION['rol'] ?? 'cajero';
+$nombreUsuario = $_SESSION['nombre'] ?? 'Usuario';
+?>
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema de Gestión de Farmacia</title>
-    <link rel="stylesheet" href="css/estilos.css">
+    <title>Sistema de Farmacia</title>
     <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 0;
-            background-color: #f8fafc;
-        }
-
-        /* Barra de navegación principal */
-        .main-header {
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: #f8fafc; color: #1e293b; min-height: 100vh; }
+        
+        /* Navbar Sticky principal */
+        .navbar {
             background-color: #0f172a;
-            color: #ffffff;
-            padding: 0 30px;
             display: flex;
-            align-items: center;
             justify-content: space-between;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            align-items: center;
+            padding: 0 24px;
+            height: 64px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
             position: sticky;
             top: 0;
             z-index: 1000;
         }
 
-        .brand-logo a {
+        .navbar-brand {
             color: #38bdf8;
-            font-size: 1.3rem;
+            font-size: 1.25rem;
             font-weight: 700;
             text-decoration: none;
             display: flex;
             align-items: center;
-            gap: 10px;
-            transition: color 0.2s ease;
-        }
-
-        .brand-logo a:hover {
-            color: #7dd3fc;
+            gap: 8px;
         }
 
         .nav-menu {
             display: flex;
-            align-items: center;
             list-style: none;
-            margin: 0;
-            padding: 0;
+            gap: 8px;
+            align-items: center;
         }
 
-        .nav-item {
-            position: relative;
-        }
+        .nav-item { position: relative; }
 
         .nav-link {
+            color: #94a3b8;
+            text-decoration: none;
+            padding: 10px 14px;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
             display: flex;
             align-items: center;
             gap: 6px;
-            padding: 20px 18px;
-            color: #cbd5e1;
-            text-decoration: none;
-            font-weight: 500;
-            font-size: 0.95rem;
-            transition: all 0.2s ease;
         }
 
-        .nav-link:hover, .nav-item:hover > .nav-link {
+        .nav-link:hover {
             color: #ffffff;
             background-color: #1e293b;
         }
 
-        /* Menús Desplegables (Dropdowns) */
+        /* Desplegables (Dropdowns) */
         .dropdown-menu {
             display: none;
             position: absolute;
             top: 100%;
             left: 0;
-            background-color: #ffffff;
-            min-width: 250px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
-            border-radius: 0 0 10px 10px;
-            overflow: hidden;
-            list-style: none;
-            margin: 0;
+            background-color: #1e293b;
+            min-width: 200px;
+            border-radius: 8px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
             padding: 8px 0;
-            z-index: 1001;
-            border: 1px solid #e2e8f0;
-            animation: fadeIn 0.2s ease-in-out;
+            list-style: none;
+            z-index: 1100;
         }
 
-        .nav-item:hover .dropdown-menu {
-            display: block;
-        }
+        .nav-item:hover .dropdown-menu { display: block; }
 
-        .dropdown-item a {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 12px 20px;
-            color: #334155;
+        .dropdown-link {
+            color: #cbd5e1;
             text-decoration: none;
-            font-size: 0.9rem;
-            font-weight: 500;
-            transition: background 0.2s ease, color 0.2s ease;
+            padding: 10px 16px;
+            display: block;
+            font-size: 0.85rem;
+            transition: background-color 0.2s;
         }
 
-        .dropdown-item a:hover {
-            background-color: #f0f9ff;
-            color: #0284c7;
+        .dropdown-link:hover {
+            background-color: #334155;
+            color: #38bdf8;
         }
 
-        /* Sección de usuario en el encabezado */
-        .user-section {
+        /* Área de usuario */
+        .user-area {
             display: flex;
             align-items: center;
-            gap: 15px;
-            background: #1e293b;
-            padding: 8px 16px;
-            border-radius: 20px;
-            border: 1px solid #334155;
+            gap: 12px;
         }
 
-        .user-name {
-            font-weight: 600;
-            font-size: 0.88rem;
+        .user-info {
+            text-align: right;
             color: #e2e8f0;
+            font-size: 0.85rem;
         }
 
         .user-role {
             font-size: 0.75rem;
-            background: #0284c7;
-            color: #ffffff;
             padding: 2px 8px;
             border-radius: 10px;
-            text-transform: capitalize;
+            font-weight: 600;
+            display: inline-block;
         }
+
+        .role-admin { background: #fef3c7; color: #92400e; }
+        .role-farmaceutico { background: #e0e7ff; color: #3730a3; }
+        .role-cajero { background: #dcfce7; color: #166534; }
 
         .btn-logout {
-            color: #f87171;
+            background: #ef4444;
+            color: white;
             text-decoration: none;
-            font-size: 0.85rem;
-            font-weight: 600;
-            padding: 4px 10px;
+            padding: 6px 12px;
             border-radius: 6px;
-            background: rgba(239, 68, 68, 0.1);
-            transition: background 0.2s ease;
+            font-size: 0.8rem;
+            font-weight: 600;
         }
 
-        .btn-logout:hover {
-            background: rgba(239, 68, 68, 0.25);
-        }
+        .btn-logout:hover { background: #dc2626; }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(6px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 30px auto;
+        /* Contenedor principal de la app */
+        .main-container {
+            max-width: 1280px;
+            margin: 24px auto;
             padding: 0 20px;
         }
     </style>
 </head>
 <body>
 
-    <header class="main-header">
-        <!-- Logo con acceso directo al Dashboard -->
-        <div class="brand-logo">
-            <a href="index.php?controlador=Dashboard&accion=index">
-                💊 Farmacia POS
-            </a>
-        </div>
+<nav class="navbar">
+    <a href="index.php?controlador=Dashboard&accion=index" class="navbar-brand">
+        💊 Farmacia Sys
+    </a>
 
-        <!-- Menú de navegación principal con desplegables -->
-        <ul class="nav-menu">
-            <!-- Inicio / Dashboard -->
-            <li class="nav-item">
-                <a href="index.php?controlador=Dashboard&accion=index" class="nav-link">📊 Inicio</a>
-            </li>
+    <ul class="nav-menu">
+        <li class="nav-item">
+            <a href="index.php?controlador=Dashboard&accion=index" class="nav-link">📊 Inicio</a>
+        </li>
 
-            <!-- Ventas -->
-            <li class="nav-item">
-                <a href="#" class="nav-link">🛒 Ventas ▾</a>
-                <ul class="dropdown-menu">
-                    <li class="dropdown-item">
-                        <a href="index.php?controlador=Venta&accion=pos">💻 Punto de Venta (POS)</a>
-                    </li>
-                    <li class="dropdown-item">
-                        <a href="index.php?controlador=Venta&accion=historial">📜 Historial y Reportes</a>
-                    </li>
-                </ul>
-            </li>
+        <!-- Módulo de Ventas (Disponible para todos los roles) -->
+        <li class="nav-item">
+            <a href="#" class="nav-link">🛒 Ventas ▾</a>
+            <ul class="dropdown-menu">
+                <li><a href="index.php?controlador=Venta&accion=pos" class="dropdown-link">💳 Punto de Venta (POS)</a></li>
+                <?php if (in_array($rolUsuario, ['admin', 'farmaceutico'])): ?>
+                    <li><a href="index.php?controlador=Venta&accion=historial" class="dropdown-link">📜 Historial y Reportes</a></li>
+                <?php endif; ?>
+            </ul>
+        </li>
 
-            <!-- Inventario -->
+        <!-- Módulo de Inventario (Solo Admin y Farmacéutico) -->
+        <?php if (in_array($rolUsuario, ['admin', 'farmaceutico'])): ?>
             <li class="nav-item">
                 <a href="#" class="nav-link">📦 Inventario ▾</a>
                 <ul class="dropdown-menu">
-                    <li class="dropdown-item">
-                        <a href="index.php?controlador=Producto&accion=index">💊 Medicamentos</a>
-                    </li>
-                    <li class="dropdown-item">
-                        <a href="index.php?controlador=Proveedor&accion=index">🚛 Proveedores</a>
-                    </li>
+                    <li><a href="index.php?controlador=Producto&accion=index" class="dropdown-link">💊 Medicamentos / Productos</a></li>
+                    <li><a href="index.php?controlador=Proveedor&accion=index" class="dropdown-link">🏭 Proveedores / Laboratorios</a></li>
                 </ul>
             </li>
-
-            <!-- Administración / CRUDs -->
-            <li class="nav-item">
-                <a href="#" class="nav-link">⚙️ Gestión ▾</a>
-                <ul class="dropdown-menu">
-                    <li class="dropdown-item">
-                        <a href="index.php?controlador=Cliente&accion=index">👥 Clientes</a>
-                    </li>
-                    <li class="dropdown-item">
-                        <a href="index.php?controlador=Usuario&accion=index">🔐 Usuarios y Permisos</a>
-                    </li>
-                </ul>
-            </li>
-        </ul>
-
-        <!-- Información de Usuario -->
-        <?php if (isset($_SESSION['nombre'])): ?>
-            <div class="user-section">
-                <span class="user-name">👤 <?= htmlspecialchars($_SESSION['nombre']) ?></span>
-                <span class="user-role"><?= htmlspecialchars($_SESSION['rol'] ?? 'Cajero') ?></span>
-                <a href="index.php?controlador=Auth&accion=logout" class="btn-logout" title="Cerrar Sesión">Salir</a>
-            </div>
         <?php endif; ?>
-    </header>
 
-    <main class="container">
+        <!-- Módulo de Clientes (Todos los usuarios) -->
+        <li class="nav-item">
+            <a href="index.php?controlador=Cliente&accion=index" class="nav-link">👥 Clientes</a>
+        </li>
+
+        <!-- Módulo de Usuarios y Permisos (EXCLUSIVO ADMINISTRADOR) -->
+        <?php if ($rolUsuario === 'admin'): ?>
+            <li class="nav-item">
+                <a href="index.php?controlador=Usuario&accion=index" class="nav-link">⚙️ Usuarios y Permisos</a>
+            </li>
+        <?php endif; ?>
+    </ul>
+
+    <!-- Info del usuario autenticado -->
+    <div class="user-area">
+        <div class="user-info">
+            <div><strong><?= htmlspecialchars($nombreUsuario) ?></strong></div>
+            <span class="user-role role-<?= htmlspecialchars($rolUsuario) ?>">
+                <?= strtoupper(htmlspecialchars($rolUsuario)) ?>
+            </span>
+        </div>
+        <a href="index.php?controlador=Auth&accion=logout" class="btn-logout">Salir</a>
+    </div>
+</nav>
+
+<div class="main-container">
