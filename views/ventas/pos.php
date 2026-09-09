@@ -286,6 +286,9 @@ function procesarVenta() {
     .then(res => res.json())
     .then(data => {
         if (data.status) {
+            // Abre automáticamente el ticket en una nueva pestaña para imprimir
+            window.open('index.php?controlador=Venta&accion=ticket&id=' + data.id_venta, '_blank');
+
             alert('¡Venta realizada con éxito!');
             carrito = [];
             renderizarCarrito();

@@ -80,4 +80,22 @@ class VentaController {
             exit;
         }
     }
+
+    // Endpoint para cargar el TICKET en vista HTML nativa
+    public function ticket() {
+        $id_venta = $_GET['id'] ?? null;
+        if (!$id_venta) {
+            die("Error: Debes proporcionar un ID de venta válido.");
+        }
+
+        // Obtener la venta y sus productos
+        $venta = method_exists($this->ventaModel, 'obtenerPorId') 
+            ? $this->ventaModel->obtenerPorId($id_venta) 
+            : ['id_venta' => $id_venta, 'fecha' => date('Y-m-d H:i:s'), 'total' => 0];
+            
+        $detalles = $this->ventaModel->obtenerDetalleVenta($id_venta);
+
+        // Cargar la vista del ticket
+        require_once __DIR__ . '/../views/ventas/ticket.php';
+    }
 }
