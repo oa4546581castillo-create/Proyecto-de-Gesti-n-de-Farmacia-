@@ -41,6 +41,28 @@
     </div>
 </div>
 
+<!-- Widget del Asistente IA -->
+<div class="ia-card">
+    <div class="ia-header">
+        <div class="ia-title-group">
+            <span class="ia-icon">🤖</span>
+            <div>
+                <h3>Asistente IA de la Farmacia</h3>
+                <p>Consulta métricas, productos con stock bajo o ventas en tiempo real</p>
+            </div>
+        </div>
+    </div>
+    <div class="ia-body">
+        <div class="ia-input-wrapper">
+            <input type="text" id="iaPregunta" placeholder="Ej: ¿Qué medicamentos están agotándose?" onkeypress="validarEnterIA(event)">
+            <button type="button" id="btnPreguntarIA" onclick="enviarConsultaIA()">Consultar</button>
+        </div>
+        <div id="iaRespuesta" class="ia-response-card" style="display: none;">
+            <p id="iaTextoRespuesta"></p>
+        </div>
+    </div>
+</div>
+
 <style>
 /* Banner de Bienvenida */
 .welcome-banner {
@@ -140,11 +162,99 @@
     height: 240px;
     width: 100%;
 }
+
+/* Estilos de la Tarjeta Asistente IA */
+.ia-card {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 24px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+    margin-top: 24px;
+}
+
+.ia-title-group {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.ia-icon {
+    font-size: 1.8rem;
+}
+
+.ia-title-group h3 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 0 0 2px 0;
+}
+
+.ia-title-group p {
+    font-size: 0.85rem;
+    color: #64748b;
+    margin: 0;
+}
+
+.ia-input-wrapper {
+    display: flex;
+    gap: 10px;
+}
+
+.ia-input-wrapper input {
+    flex: 1;
+    padding: 12px 16px;
+    border: 1px solid #cbd5e1;
+    border-radius: 10px;
+    font-size: 0.95rem;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.ia-input-wrapper input:focus {
+    border-color: #0284c7;
+}
+
+.ia-input-wrapper button {
+    background: #0284c7;
+    color: #ffffff;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 10px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.ia-input-wrapper button:hover {
+    background: #0369a1;
+}
+
+.ia-input-wrapper button:disabled {
+    background: #94a3b8;
+    cursor: not-allowed;
+}
+
+.ia-response-card {
+    margin-top: 16px;
+    padding: 14px 18px;
+    background-color: #f0f9ff;
+    border-left: 4px solid #0284c7;
+    border-radius: 8px;
+}
+
+.ia-response-card p {
+    margin: 0;
+    color: #0c4a6e;
+    font-size: 0.95rem;
+    line-height: 1.5;
+}
 </style>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // 1. Gráfico de Barras: Ventas de Hoy
+    // 1. Gráfico de Barras: Ventas del Día
     const ctxVentas = document.getElementById('chartVentas').getContext('2d');
     new Chart(ctxVentas, {
         type: 'bar',
@@ -212,4 +322,50 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 });
+
+// Funciones del Asistente IA
+function validarEnterIA(event) {
+    if (event.key === 'Enter') {
+        enviarConsultaIA();
+    }
+}
+
+function enviarConsultaIA() {
+    const input = document.getElementById('iaPregunta');
+    const btn = document.getElementById('btnPreguntarIA');
+    const responseBox = document.getElementById('iaRespuesta');
+    const textResponse = document.getElementById('iaTextoRespuesta');
+    const pregunta = input.value.trim();
+
+    if (!pregunta) return;
+
+    btn.disabled = true;
+    btn.textContent = 'Pensando...';
+    responseBox.style.display = 'block';
+    textResponse.textContent = 'Consultando la base de datos...';
+
+    fetch('index.php?controlador=Dashboard&accion=consultarAsistente', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ pregunta: pregunta })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status) {
+            textResponse.textContent = data.respuesta;
+        } else {
+            textResponse.textContent = '⚠️ ' + (data.error || 'Ocurrió un error al procesar la respuesta.');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        textResponse.textContent = '⚠️ Error al conectar con el servidor.';
+    })
+    .finally(() => {
+        btn.disabled = false;
+        btn.textContent = 'Consultar';
+    });
+}
 </script>
